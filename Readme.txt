@@ -8,6 +8,9 @@ eigenvalue problem with \tilde{kappa}
 
 Before running, change parameters accordingly (number of coarse blocks, fine mesh size, high-contrast coefficient, ...) 
 
+The equation is -div( kappa(x) grad(u)) =f in a square two dimensional domain. 
+The GMsFEM method was developed for obtaining coarse-scale approximation when  kappa being a high-contrast multiscale coefficient. 
+
 WARNING: This code was built on overlapping and nonoverlapping domain decomposition codes. 
 Therefore some computations are coded in ways closer to domain decomposition than multiscale methods. If your training is in multiscale methods, you may find some procedures odd to you. 
 
