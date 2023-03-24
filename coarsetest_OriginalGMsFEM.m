@@ -76,7 +76,7 @@ el2R=norm_l2_global(ER,dom,Nx,Ny)/L2xf;
 % ehRtilde=norm_h1_global(ERtilde,dom,Nx,Ny)/Hxf;
 % el2Rtilde=norm_l2_global(ERtilde,dom,Nx,Ny)/L2xf;
 
-
+colormap("jet")
 
 figure(1)
 subplot(2,2,1) 
@@ -113,7 +113,7 @@ tb(1,additional_basis+1).L2weigE=L2weigE;
 tb(1,additional_basis+1).H1E=H1E;
 tb(1,additional_basis+1).L2E=L2E;
 tb(1,additional_basis+1).dim2C=size(A02C,2);
-tb(1,additional_basis+1).dim2Ctilde=size(A02Ctilde,2);
+%tb(1,additional_basis+1).dim2Ctilde=size(A02Ctilde,2);
 
 
 

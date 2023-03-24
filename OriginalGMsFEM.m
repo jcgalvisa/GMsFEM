@@ -1,7 +1,7 @@
 
 highcontrast=10^4; %contrast
 % next script generates coefficient_values
-generatecoefficient
+generatecoefficient2
 
 max_it=2000;
 tol=1e-10;
@@ -9,9 +9,9 @@ tol=1e-10;
 % The doman is [0,1]x[0,1]. keep this domain.
 ax=0;bx=1;ay=0;by=1;
 % Number of coarse blocks in the x and y direction
-Nx=5; Ny=Nx;
+Nx=10; Ny=Nx;
 % Number of fine-grid elements in each coarse block
-nx=5; ny=nx;
+nx=15; ny=nx;
 
 
 %number of additional basis functions for all coarse nodes neighborhoods
