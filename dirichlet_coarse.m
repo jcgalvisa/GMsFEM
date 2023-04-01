@@ -1,4 +1,4 @@
-function x0d=dirichlet_coarse(x0,dir,vC)
+ function x0d=dirichlet_coarse(x0,dir,vC)
 
 x0d=0*x0;
 X=vC(:,1);

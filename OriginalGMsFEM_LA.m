@@ -12,13 +12,13 @@ ax=0;bx=1;ay=0;by=1;
 % Number of coarse blocks in the x and y direction
 Nx=5; Ny=Nx;
 % Number of fine-grid elements in each coarse block
-nx=10; ny=nx;
+nx=5; ny=nx;
 
 
 %number of additional basis functions for all coarse nodes neighborhoods
 % these are on top of need basis fucntions according to spectral gap
 % In total it used additional_basis+spectral_gap_basis
-additional_basis =4;
+additional_basis =5;
 
 
 % all informaion neede for coarse blocks 

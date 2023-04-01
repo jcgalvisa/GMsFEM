@@ -16,7 +16,7 @@ Mxf=full(dot(xf,Mxf));
 % % AE2L= applay_AN(E2L,dom,Nx,Ny);
 % % ee2L=full(dot(E2L,AE2L))/Ex;
 
-
+colormap("jet")
 
 z0auxMS=apply_P0MSBd(b,dom_ov,Nx,Ny,A0MS,d0MS,v0MS);
 EMS=z0auxMS-xf;

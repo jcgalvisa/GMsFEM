@@ -14,6 +14,7 @@ fprintf('Setting coarse neighborhood info... \n');
 %%%% hbarn=0;
 intx=[ax,bx];
 inty=[ay,by];
+fprintf('...Fine mesh and dofs... \n');
 for i1=1:Nx+1
     for i2=1:Ny+1
      %%%   hbarn=hbarn+1;
@@ -41,6 +42,7 @@ nvel=(Nx*nx+1)*(Ny*ny+1);
 b=sparse(nvel,1);
 %%% hbarn=0;
 %%% hbar=waitbar(0,':(');
+fprintf('...Neighborhoods fine grid matrices :stiffness, mass... \n');
 for i1=1:Nx+1
     for i2=1:Ny+1
     %%%    hbarn=hbarn+1;
@@ -53,9 +55,7 @@ for i1=1:Nx+1
         [Asd,bsd]=Nmatrix(M,v,mesh,coefficient_values);
         Massd=NMassmatrix(M,v,mesh,coefficient_values);
         Ngrad=NNgradmatrix(M,v,mesh,coefficient_values);
-        dom(i1,i2).Ngrad=Ngrad;
         dom(i1,i2).Mass=Massd;
-
         dom(i1,i2).A=Asd;
     end
 end

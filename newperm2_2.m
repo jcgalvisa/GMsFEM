@@ -1,5 +1,5 @@
 
-
+M=1e+5; %contrast
 
 
 rand('twister',50482)

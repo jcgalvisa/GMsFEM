@@ -12,13 +12,14 @@ Hy=(by-ay)/Ny;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf('Setting coarse blocks info \n');
+fprintf('Setting coarse blocks info ...\n');
 
 intx=[ax,bx];
 inty=[ay,by];
 ov=0;
 %%%  hbar=waitbar(0,':)');
 %%% hbarn=0;
+fprintf('...Fine mesh and dofs for each blok... \n');
 for i1=1:Nx
     for i2=1:Ny
         %%% hbarn=hbarn+1;
@@ -36,21 +37,21 @@ for i1=1:Nx
         dom(i1,i2).free=1:size(Ig,2);
         dom(i1,i2).Igfreedir=Igfree;
         dom(i1,i2).freedir=free;
-        
+
     end
 end
 % close(hbar);
- for i1=1
-     for i2=1:Ny
-         vleft=dom(i1,i2).B.vleft;
-         Ig=dom(i1,i2).Ig;
-         free=dom(i1,i2).free;
-         free=setdiff(free,vleft);
-         Igfree=Ig(free);
-         dom(i1,i2).Igfree=Igfree;
-         dom(i1,i2).free=free;
-     end
- end
+for i1=1
+    for i2=1:Ny
+        vleft=dom(i1,i2).B.vleft;
+        Ig=dom(i1,i2).Ig;
+        free=dom(i1,i2).free;
+        free=setdiff(free,vleft);
+        Igfree=Ig(free);
+        dom(i1,i2).Igfree=Igfree;
+        dom(i1,i2).free=free;
+    end
+end
 clear vleft
 for i1=Nx
     for i2=1:Ny
@@ -98,78 +99,18 @@ nvel=(Nx*nx+1)*(Ny*ny+1);
 b=sparse(nvel,1);
 %%% hbarn=0;
 %%% hbar=waitbar(0,':)');
+
+fprintf('...Local stifness matrix... \n');
+
 for i1=1:Nx
     for i2=1:Ny
-    %%%     hbarn=hbarn+1;
-    %%%    waitbar(hbarn/(Nx*Ny),hbar)
         M=dom(i1,i2).M;
         v=dom(i1,i2).v;
         mesh=dom(i1,i2).mesh;
-        free=dom(i1,i2).free;
-        
+
         [Asd,bsd]=Nmatrix(M,v,mesh,k1perm);
         Massd=NMassmatrix(M,v,mesh,k1perm);
         dom(i1,i2).Mass=Massd;
         dom(i1,i2).A=Asd;
-        dom(i1,i2).b=bsd(free);
-        colI=dom(i1,i2).Igfree;
-        b(colI)=b(colI)+bsd(free);
     end
 end
-%%% close(hbar)
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) %%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% % fprintf('Assambling Global Right Hand Side \n');
-% % nvel=(Nx*nx+1)*(Ny*ny+1);
-% % b=sparse(nvel,1);
-% % %plot_vector(b,dom,Nx,Ny)
-% %  for i1=1:Nx
-% %     for i2=1:Ny
-% %         colI=dom(i1,i2).Igfree;
-% %         freel=dom(i1,i2).free;
-% %         b(colI)=b(colI)+dom(i1,i2).b(freel);
-% % %        plot_vector(b,dom,Nx,Ny)
-% % %        pause
-% %     end
-% % end
-
-
-
-% % % fprintf('Assambling Matrices \n');
-% % % 
-% % % 
-% % % [A,b]=Nmatrix(M,v,mesh);
-% % % 
-% % % 
-% % % 
-% % % upT=B.up;
-% % % upv=M(upT,[2,3]);
-% % % upv=unique(upv(:));
-% % % 
-% % % leftT=B.left;
-% % % leftv=M(leftT,[1,3]);
-% % % leftv=unique(leftv(:));
-% % % 
-% % %  downT=B.down;
-% % %  downv=M(downT,[1,2]);
-% % %  downv=unique(downv(:));
-% % % 
-% % %  rightT=B.right;
-% % %  rightv=M(rightT,[2,3]);
-% % %  rightv=unique(rightv(:));
-% % %  
-% % %  d=unique([upv,leftv,downv,rightv]);
-% % % free=setdiff(1:mesh.nv,d);
-% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % %%%% (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) (0) %%%%%
-% % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % u=sparse(mesh.nv,1);
-% % % u(free)=A(free,free)\b(free);
-% % % 
-% % % el2=error_l2(u,M,v,mesh);
-% % % eh1=error_h1(u,M,v,mesh);
