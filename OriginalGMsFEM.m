@@ -10,7 +10,7 @@ tol=1e-6;
 % The doman is [0,1]x[0,1]. keep this domain.
 ax=0;bx=1;ay=0;by=1;
 % Number of coarse blocks in the x and y direction
-Nx=5; Ny=Nx;
+Nx=10; Ny=Nx;
 % Number of fine-grid elements in each coarse block
 nx=10; ny=nx;
 
@@ -20,13 +20,13 @@ nx=10; ny=nx;
 % In total it used additional_basis+spectral_gap_basis
 additional_basis =4;
 
-
 % all informaion neede for coarse blocks 
 % and coarse neighborhoods
 [dom,dom_ov,b,bnew,xd]=coarsemeshOriginalGMsFEM(ax,bx,ay,by,Nx,Ny,nx,ny,coefficient_values,max_it,tol,additional_basis);
 
 
 [Afinegrid,Massfinegrid, free]=FineGridNMatrix(b,dom,Nx,Ny);
+
 bd=b-Afinegrid*xd;
 
 fprintf('Q1 Coarse Matrix...\n');
