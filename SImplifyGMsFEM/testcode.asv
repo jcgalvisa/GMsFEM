@@ -2,8 +2,8 @@
 ax=0;bx=1;ay=0;by=1;
 Nx=10; Ny=Nx;
 nx=10;ny=nx;
-intx=[ax,bx];
-inty=[ay,by];
+intx=[0,4];
+inty=[0,1];
 add=1; %number of additional basis functions
 
 % mesh informaition
@@ -12,9 +12,7 @@ add=1; %number of additional basis functions
 
 % coefficient (it is a vector with the coefficient values in each element).
 % coefficient value is added to the triangulation information, 
-%Coefficient_values=0*rand((Nx*nx*Ny*ny),1)+1;
-example_coefficient
-Coefficient_values=k(:);
+Coefficient_values=0*rand((Nx*nx*Ny*ny),1)+1;
 Elements=[Element_list,Coefficient_values];
 
 % Stiffness and load vector in the fine mesh
@@ -56,18 +54,21 @@ b0G=R0GMsFEM'*bfinegrid-A0GMsFEM*x0dG;
 downz0G=compute_GMsFEMpressure(A0GMsFEM,b0G,R0GMsFEM,free0G,x0dG);
 
 %plot_vector(downz0G, dom,Nx,Ny,coefficient_values); title(['GMsFEM pressure']) ;view(2); shading flat
-Z0G=reshape(downz0G,Nx*nx+1,Ny*ny+1)';
-
 figure(1)
-subplot(2,1,1)
-title('Fine scale  solution')
-surf(Xf,Yf,Zf)
-subplot(2,1,2)
-surf(Xf,Yf,Z0G)
-title('GMsFEM solution ( -basis)',add)
+Z0reshape(downz0G,Nx*nx+1,Ny*ny+1)')
 
-Error=zfine-downz0G;
-nError= sqrt(dot(Afinegrid*Error,Error)/dot(Afinegrid*zfine,zfine));
-fprintf('The error is %f Percent \n',100*full(nError))
+
+figure(3)
+subplot(1,2,1)
+surf(reshape(Elements(:,5),Nx*nx,Ny*ny)')
+view(2)
+title("coefficient")
+axis square
+subplot(1,2,2)
+surf(reshape(pelement,Nx*nx,Ny*ny)')
+view(2)
+title("pressure")
+axis square
+
 
 
