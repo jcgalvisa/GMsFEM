@@ -4,13 +4,14 @@ Nx=10; Ny=Nx;
 nx=10;ny=nx;
 intx=[ax,bx];
 inty=[ay,by];
-add=1; %number of additional basis functions
+add=5; %number of additional basis functions
 
 % mesh informaition
 [Element_list, Boundary,vertex_list,mesh_parameter,h,boundary_nodes,free]=square_mesh(nx,ny,Nx,Ny,intx,inty);
 
 
 % coefficient (it is a vector with the coefficient values in each element).
+% coefficient must be of size Nx*nx*Ny*ny.
 % coefficient value is added to the triangulation information, 
 %Coefficient_values=0*rand((Nx*nx*Ny*ny),1)+1;
 example_coefficient
