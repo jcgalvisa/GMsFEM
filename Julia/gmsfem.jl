@@ -10,70 +10,82 @@ using LinearAlgebra, SparseArrays, Plots
 # ╔═╡ a8783a10-f9b7-454c-b985-c2e41d6be960
 begin
 function square_mesh(nx, ny, Nx, Ny, intx, inty)
-#    println("Setting fine mesh...")
+    # Calculating mesh parameters
     ne_x = Nx * nx
     ne_y = Ny * ny
     number_of_vertex = (ne_x + 1) * (ne_y + 1)
-
-    ax = intx[1]
-    bx = intx[2]
-    ay = inty[1]
-    by = inty[2]
+    
+    ax, bx = intx
+    ay, by = inty
 
     hx = (bx - ax) / ne_x
     hy = (by - ay) / ne_y
-    nv = 0  
 
+    # Generating vertex list
     vertex_list = zeros(number_of_vertex, 2)
-    for iy in 1:ne_y + 1
-        for ix in 1:ne_x + 1
-            nv += 1
-            vertex_list[nv, 1] = ax + (ix - 1) * (bx - ax) / ne_x
-            vertex_list[nv, 2] = ay + (iy - 1) * (by - ay) / ne_y
+    for iy in 0:ne_y
+        for ix in 0:ne_x
+            nv = ix + (ne_x + 1) * iy + 1
+            vertex_list[nv, 1] = ax + ix * hx
+            vertex_list[nv, 2] = ay + iy * hy
         end
     end
 
-    neup, nedown, neleft, neright = 0, 0, 0, 0
-    eup = zeros(Int, ne_x)
-    edown = zeros(Int, ne_x)
-    eleft = zeros(Int, ne_y)
-    eright = zeros(Int, ne_y)
-    ne = 0
+    # Generating element list and boundary lists
     Element_list = zeros(Int, ne_x * ne_y, 5)
-    
+    neup, nedown, neleft, neright = 0, 0, 0, 0
+    eup, edown = Int[], Int[]
+    eleft, eright = Int[], Int[]
+    ne = 0
+
     for iy in 1:ne_y
         for ix in 1:ne_x
             ne += 1
             v1 = ix + (ne_x + 1) * (iy - 1)
-            v2 = ix + 1 + (ne_x + 1) * (iy - 1)
-            v3 = ix + 1 + (ne_x + 1) * iy
-            v4 = ix + (ne_x + 1) * iy
-            Element_list[ne, :] = [v1, v2, v3, v4,ne]
+            v2 = v1 + 1
+            v3 = v2 + (ne_x + 1)
+            v4 = v1 + (ne_x + 1)
+            Element_list[ne, :] = [v1, v2, v3, v4, ne]
 
             if iy == 1
-                nedown += 1
-                edown[nedown] = ne
+                push!(edown, ne)
             end
             if ix == ne_x
-                neright += 1
-                eright[neright] = ne
+                push!(eright, ne)
             end
             if iy == ne_y
-                neup += 1
-                eup[neup] = ne
+                push!(eup, ne)
             end
             if ix == 1
-                neleft += 1
-                eleft[neleft] = ne
+                push!(eleft, ne)
             end
         end
     end
 
+    # Generating boundary dictionaries
+    Boundary = Dict(
+        :up => eup,
+        :down => edown,
+        :left => eleft,
+        :right => eright
+    )
+
+    # Generating lists of boundary nodes
+    vup = [(ne_x + 1) * ne_y + 1:(ne_x + 1) * (ne_y + 1)]
+    vdown = 1:(ne_x + 1)
+    vleft = 1:(ne_x + 1):(ne_x + 1) * ne_y + 1
+    vright = (ne_x + 1):(ne_x + 1):(ne_x + 1) * (ne_y + 1)
+
+    boundary_nodes = unique(vcat(vup, vleft, vdown, vright))
+    all_nodes = 1:number_of_vertex
+    free = setdiff(all_nodes, boundary_nodes)
+
+    # Mesh parameters dictionary
     mesh_parameter = Dict(
         :nex => ne_x,
         :ney => ne_y,
         :ne => ne,
-        :nv => nv,
+        :nv => number_of_vertex,
         :ax => ax,
         :bx => bx,
         :ay => ay,
@@ -81,58 +93,6 @@ function square_mesh(nx, ny, Nx, Ny, intx, inty)
         :hx => hx,
         :hy => hy
     )
-
-    nvup, nvdown, nvleft, nvright = 0, 0, 0, 0
-    vup = zeros(Int, ne_x + 1)
-    for iy in ne_y:ne_y
-        for ix in 1:ne_x
-            nvup += 1
-            vup[nvup] = ix + (ne_x + 1) * iy
-            vup[nvup + 1] = ix + 1 + (ne_x + 1) * iy
-        end
-    end
-
-    vdown = zeros(Int, ne_x + 1)
-    for iy in 1:1
-        for ix in 1:ne_x
-            nvdown += 1
-            vdown[nvdown] = ix + (ne_x + 1) * (iy - 1)
-            vdown[nvdown + 1] = ix + 1 + (ne_x + 1) * (iy - 1)
-        end
-    end
-
-    vleft = zeros(Int, ne_y + 1)
-    for iy in 1:ne_y
-        for ix in 1:1
-            nvleft += 1
-            vleft[nvleft] = ix + (ne_x + 1) * (iy - 1)
-            vleft[nvleft + 1] = ix + (ne_x + 1) * iy
-        end
-    end
-
-    vright = zeros(Int, ne_y + 1)
-    for iy in 1:ne_y
-        for ix in ne_x:ne_x
-            nvright += 1
-            vright[nvright] = ix + 1 + (ne_x + 1) * (iy - 1)
-            vright[nvright + 1] = ix + 1 + (ne_x + 1) * iy
-        end
-    end
-
-    Boundary = Dict(
-        :up => eup,
-        :down => edown,
-        :left => eleft,
-        :right => eright,
-        :vup => vup,
-        :vdown => vdown,
-        :vleft => vleft,
-        :vright => vright
-    )
-
-    boundary_nodes = unique(vcat(vup, vleft, vdown, vright))
-    all_nodes = collect(1:number_of_vertex)
-    free = setdiff(all_nodes, boundary_nodes)
 
     return Element_list, Boundary, vertex_list, mesh_parameter, hx, boundary_nodes, free
 end
