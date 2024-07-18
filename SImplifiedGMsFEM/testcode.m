@@ -4,7 +4,7 @@ Nx=10; Ny=Nx;
 nx=10;ny=nx;
 intx=[ax,bx];
 inty=[ay,by];
-add=5; %number of additional basis functions
+add=1; %number of additional basis functions
 
 % mesh informaition
 [Element_list, Boundary,vertex_list,mesh_parameter,h,boundary_nodes,free]=square_mesh(nx,ny,Nx,Ny,intx,inty);
