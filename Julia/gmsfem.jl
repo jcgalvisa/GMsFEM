@@ -7,6 +7,71 @@ using InteractiveUtils
 # ╔═╡ 00ff805d-d9c1-4312-a5a3-ba173205db39
 using LinearAlgebra, SparseArrays, Plots
 
+# ╔═╡ 70650d20-4f57-47c5-9a17-22ee97222a6c
+md"""
+In order to introduce the details of GMsFEM, we will present a simple
+example demonstrating the 
+main concept of GMsFEM. We consider
+
+$-\mbox{div}(\kappa(x)\nabla u)=f\ \text{in}\ D,$
+
+$u=g$ on $\partial D$.
+"""
+
+# ╔═╡ d39d4a1d-0972-468f-b931-d097d39ea182
+md""" For our simple example we consider the following forcing term and boundary condition."""
+
+# ╔═╡ 544752c6-fa7d-4dea-a7fa-e625f966df93
+function forcing(x1, x2)
+    y1 = 0 .* x1
+    return y1
+end
+
+# ╔═╡ 178e0902-c2c7-4bf3-8b6b-0c1e0066253f
+function boundary_condition(x,y)
+z=y.^2 .+1-x;
+end
+
+# ╔═╡ 6336610a-c17b-41d8-ad88-43901bbde98c
+md"""
+ A variational formulation of problem \eqref{eq:problem1} is: 
+Find $p\in H^1(\Omega)$ with $(p-p_D)\in H_{0}^1=\left\{w\in H^1(\Omega) : w|_{\partial\Omega}=0\right\}$ such that
+
+$a(p,v)=\ell(v) \quad \mbox{ for all } v\in H_0^1(\Omega),$
+
+where the bilinear form $a$  is defined by
+
+$a(p,v)=\int_\Omega \kappa (x)\nabla p(x)\nabla v(x) dx,$
+
+and the functional $\ell$ is defined by 
+
+$\ell(v)=\int_\Omega f(x)v(x)dx,$
+
+for $p,v\in H_0^1(\Omega)$. 
+"""
+
+# ╔═╡ 56cf4d5e-e309-451f-9b03-7d15fa776a33
+md"""
+ Let $\tau^h$ be a triangulation of the domain $\Omega$.  As it is usual in multiscale methods, we assume that $h$ is fine enough to completely describe all the variations of the coefficient $\kappa$ and 
+therefore we refer to $\tau^h$ as the fine mesh.  We denote by $V^h(\Omega)$ the usual finite elements discretization of piecewise linear (or bilinear) continuous functions with respect to $\tau^h$. Denote by $V_0^h(\Omega)$ the subset of $V^h(\Omega)$ made of functions that vanish on $\partial\Omega$. 
+
+The Galerkin formulation leads to the solution of the (fine-grid) linear system
+
+$A_h u_h=b_h$
+
+where 
+
+$u^TAv=\int_{\Omega} \kappa\nabla u\nabla v\text{,}$
+
+"""
+
+# ╔═╡ 3b04b465-1ba9-41a6-bdb7-694baf08e03a
+md""" For the very simple example presented here we consider $\Omega=I_x\times I_y$ and a fine mesh made of squares. 
+For later use introduce $N_x$ and $N_y$, the number of coarse blocks in the $x$ and $y$ direction and $n_x$ and $n_y$ the number of fine grid elements in each direction. In total we have a fine grid made of $N_xn_xN_yn_y$ elements.
+
+The following Julia function creates such a mesh. Here `intx` and  `inty` denote the intervals in each direction.
+"""
+
 # ╔═╡ a8783a10-f9b7-454c-b985-c2e41d6be960
 begin
 function square_mesh(nx, ny, Nx, Ny, intx, inty)
@@ -100,6 +165,17 @@ end
 
 end
 
+# ╔═╡ d53cca98-a87c-4dc6-aee9-836903b619b1
+begin
+	ax = 0; bx = 1; ay = 0; by = 1; intx = [ax, bx]; inty = [ay, by]
+	Nx = 10;Ny = 10; nx = 10 ;ny = 10; 
+	
+	Elements, Boundary, vertex_list, mesh_parameter, h, boundary_nodes, free = square_mesh(nx, ny, Nx, Ny, intx, inty)
+end
+
+# ╔═╡ bf49c378-19fd-4f3b-8981-c58822f4cae8
+md""" We also need the functions that compute local matrices."""
+
 # ╔═╡ 5ad0cb95-7ed2-4030-b6ce-9790f1772ba6
 begin
 function localA(T, v)
@@ -176,66 +252,6 @@ end
 
 end
 
-# ╔═╡ 0d89d5af-05ca-43ac-b397-f3e036ff9ef4
-function localMass(T, v)
-    x = zeros(4)
-    y = zeros(4)
-
-    for j in 1:4
-        x[j] = v[(T[j]), 1] 
-        y[j] = v[(T[j]), 2]
-    end
-
-    o = [5/9, 8/9, 5/9]
-    p = [-sqrt(15)/5, 0, sqrt(15)/5]
-    indices = [1 1; 1 2; 1 3; 2 1; 2 2; 2 3; 3 1; 3 2; 3 3]
-    Omega = [o[1]*o; o[2]*o; o[3]*o]
-	indices_lineal = vec(indices)
-    P = p[indices_lineal]
-#	println(P)
-    P = reshape(P, (9, 2))
-
-    x1, x2, x3, x4 = x
-    y1, y2, y3, y4 = y
-    hx = x2 - x1
-    hy = y4 - y1
-
-    xi = x1 .+ 0.5 .* (1 .+ P[:, 1]) .* (x2 .- x1)
-    eta = y1 .+ 0.5 .* (1 .+ P[:, 2]) .* (y4 .- y1)
-
-    txi = (xi .- x1) ./ hx
-    teta = (eta .- y1) ./ hy
-
-   
-    
-    ub = zeros(4, length(txi))
-    ub[1,:] = (1 .- txi) .* (1 .- teta)
-    ub[2,:] = txi .* (1 .- teta)
-    ub[3,:] = txi .* teta
-    ub[4,:] = (1 .- txi) .* teta
-
-    coef =1
-    L = zeros(4, 4)
-
-    for i1 in 1:4
-        for i2 in 1:4
-            UxV = ub[i1, :] .* ub[i2, :]
-            integrand = coef .* UxV
-            L[i1, i2] = sum(Omega .* integrand)
-        end
-    end
-
-    L *= hx / 2 * hy / 2
-    return L
-end
-
-
-# ╔═╡ 544752c6-fa7d-4dea-a7fa-e625f966df93
-function forcing(x1, x2)
-    y1 = 0 .* x1
-    return y1
-end
-
 # ╔═╡ 3e140131-d3b8-4369-8e68-c1daf6ff9d2c
 begin
 function localb(T, v)
@@ -291,6 +307,19 @@ end
 
 end
 
+# ╔═╡ 3371ae2b-8285-499a-bcd4-1e2eef1202b7
+md""" For our simple example the forcing term is coded in the following function."""
+
+# ╔═╡ 6dab157d-b945-4141-90d9-8cf955ba1de6
+md""" Then we construct global matrices and vectors. For our simple example the coefficient is a matrix $\kappa$ of size $N_y*n_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. """
+
+# ╔═╡ c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
+begin
+	K = 10000*rand(Nx*nx, Ny*ny)
+	coefficient_values_aux = 1 .+  K[1:Nx*nx, 1:Ny*ny]
+	coefficient_values = coefficient_values_aux[:]
+end
+
 # ╔═╡ d0a533b0-9a70-4e61-ace4-64f6fb789448
 begin
 
@@ -314,6 +343,58 @@ function Nmatrix(M::Matrix{Int64}, v::Matrix{Float64}, coef::Vector{Float64}, me
     return A, b
 end
 end
+
+# ╔═╡ b39e8d4d-10c5-49c1-b63a-85a006a45e55
+
+
+# ╔═╡ f6988d22-7c89-4f09-9f7d-72935a0c62f0
+
+#Fine grid matrices	
+Afinegrid,bfinegrid=Nmatrix(Elements,vertex_list,coefficient_values,mesh_parameter)
+
+# ╔═╡ 1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
+md""" We can then use Julia solver to compute the fine-grid solution. We will refere to this solution as the reference solution. We need to impose the Dirichlet boundary condition for our simple example."""
+
+# ╔═╡ 50ae23c5-ac63-49d3-b841-66a41516fe43
+begin
+	#Fine scale solution	
+	xdfine=boundary_condition(vertex_list[:,1],vertex_list[:,2]);
+	bfinegrid_corrected=bfinegrid-Afinegrid*xdfine;
+	pfineaux=bfinegrid*0;
+	pfineaux[free]=Afinegrid[free,free]\bfinegrid_corrected[free]
+	pfine=xdfine+pfineaux
+end
+
+# ╔═╡ 31a2b7ed-74f3-495a-a9b7-9eeab2ba79c2
+md""" We can use plot to visualize the reference solution."""
+
+# ╔═╡ b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
+plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))	
+
+# ╔═╡ 3ce90889-e2f7-4c19-8c1e-c5353686dcba
+md"""
+This fine-grid sistem is very large and ill-conditioned and in many situations it is impractical to solve it using and itertive method. Besides of preconditioning, constructing small subspaces (referred to as coarse subspaces) that can capture main properties of the solution. GMsFEM can be viewed as a succesfull methodology to construct coarse spaces.
+
+"""
+
+# ╔═╡ 7668b780-299e-492e-859c-57acd0d6b4f0
+md""" 
+We briefly review the main aspect of the GMsFEM. We introduce a coarse-scale mesh $\mathcal{T}^H$, where $H$ indicates the coarse mesh size. 
+Let $N_c$ be the total number of coarse elements and $N_v$ be the total number of vertices of $\mathcal{T}^H.$
+In practical applications, the coarse-grid does not resolve all the variations and discontinuities of the coefficient $\kappa$.
+It is very important to point out the for the GMsFEM method, there is no need to align the coarse mesh with the discontinuities of the coefficient or the high-contrast regions. 
+A main goal in multiscale methods is to construct approximation strategies to mimic fine-grid approximation properties but only compute solutions of linear systems at the coarse scale. 
+
+The GMsFEM is a multiscale method designed to obtain a good approximation of high-contrast multiscale problems.  
+We next review some important aspects in the construction of GMsFEM basis functions. See the references  for further details.
+
+We denote by $\{y_i\}_{i=1}^{N_v}$ the vertices of the coarse mesh $\mathcal{T}^H$ and define the neighborhood of each node $y_i$ by 
+
+$\omega_i=\bigcup\left\{ K\in \mathcal{T}^H: y_i \in\bar{K}  \right\}.$
+"""
+
+# ╔═╡ c1fa4106-2c9f-42aa-8aca-f3f4ffe0300a
+md""" For our simple example we consider a coarse mesh made of $N_x$ element in the x direcction and $N_y$ elements in the y direction. We compute the corresponding data for each neighborhood in the following functions.""" 
 
 # ╔═╡ 7696d9b6-b389-436d-b0db-fa05be494628
 begin
@@ -387,37 +468,88 @@ function neighborhoods(ax, bx, ay, by, Nx, Ny, nx, ny)
 end
 end
 
-# ╔═╡ 26e66683-c592-46e1-bcf7-9534a4f5d251
-function phiI(c::Vector{Float64}, diamx::Float64, diamy::Float64, vx::Vector{Float64}, vy::Vector{Float64})
-    x = (1 .- 2 .* abs.(vx .- c[1]) ./ diamx)
-    y = (1 .- 2 .* abs.(vy .- c[2]) ./ diamy)
-    z = x .* y
-    return z
-end
+# ╔═╡ 615e4804-9fcd-4265-9514-abfa981d5908
+#Neighborhoods
+neigh=neighborhoods(ax,bx,ay,by,Nx,Ny,nx,ny);
+
+# ╔═╡ fb131848-d26b-461b-982c-7adbbda3c8ad
+md"""
+For each coarse node neighborhood $\omega_i$, consider the eigenvalue problem (which is the simplest that one can considere, see the references)
+
+$-\mbox{div}(\kappa  \nabla \psi_\ell^{\omega_i})=\lambda_\ell^{\omega_i}\kappa \psi_\ell^{\omega_i}, \quad \mbox{in }\omega_i$
+with homogeneous Neumann
+boundary condition on $\partial \omega_i$.
+
+Here $\lambda_\ell^{\omega_i}$
+ and  $\psi_\ell^{\omega_i}$ are eigenvalues and
+eigenvectors in $\omega_i$.
+We use an ascending ordering on the eigenvectors, 
+
+$\lambda_1^{\omega_i}\leq \lambda_2^{\omega_i}\leq....$
 
 
-# ╔═╡ a3b63bfd-663f-4698-ae30-102b30fa1267
-function linearones(neigh, Nx, Ny, b, vertex_list)
-	aux=0
-    for i1 in 1:Nx+1
-        for i2 in 1:Ny+1
-            xlin = b*0
-            c = neigh[i1, i2].c
-			#aux= neigh[i1, i2].diam[:x]
-            diamx = neigh[i1, i2].diam[:x]
-            diamy = neigh[i1, i2].diam[:y]
-            Ig = neigh[i1, i2].nodes
-            vx = vertex_list[Ig]
-            vy = vertex_list[Ig,2]
-            xlin[Ig] = phiI(c, diamx, diamy, vx, vy)
-			#aux = phiI(c, diamx, diamy, vx, vy)
-            neigh[i1, i2].philin = xlin
+"""
 
+# ╔═╡ b0f44a41-0236-4890-8b4f-d9c9ede361ba
+md""" We use the fine-grid restricted to $\omega_i$ to compute this eigenvalue problem that in matrix form corresponds to 
 
+$A_h^i \psi_\ell^{\omega_i} = \lambda_\ell^{\omega_i} M_h^i \psi_\ell^{\omega_i},$
+
+where $M_h^i$ corresponds to the weighted by $\kappa$ mass matrix. The functions need to compute the mass matrix are the following."""
+
+# ╔═╡ 0d89d5af-05ca-43ac-b397-f3e036ff9ef4
+function localMass(T, v)
+    x = zeros(4)
+    y = zeros(4)
+
+    for j in 1:4
+        x[j] = v[(T[j]), 1] 
+        y[j] = v[(T[j]), 2]
+    end
+
+    o = [5/9, 8/9, 5/9]
+    p = [-sqrt(15)/5, 0, sqrt(15)/5]
+    indices = [1 1; 1 2; 1 3; 2 1; 2 2; 2 3; 3 1; 3 2; 3 3]
+    Omega = [o[1]*o; o[2]*o; o[3]*o]
+	indices_lineal = vec(indices)
+    P = p[indices_lineal]
+#	println(P)
+    P = reshape(P, (9, 2))
+
+    x1, x2, x3, x4 = x
+    y1, y2, y3, y4 = y
+    hx = x2 - x1
+    hy = y4 - y1
+
+    xi = x1 .+ 0.5 .* (1 .+ P[:, 1]) .* (x2 .- x1)
+    eta = y1 .+ 0.5 .* (1 .+ P[:, 2]) .* (y4 .- y1)
+
+    txi = (xi .- x1) ./ hx
+    teta = (eta .- y1) ./ hy
+
+   
+    
+    ub = zeros(4, length(txi))
+    ub[1,:] = (1 .- txi) .* (1 .- teta)
+    ub[2,:] = txi .* (1 .- teta)
+    ub[3,:] = txi .* teta
+    ub[4,:] = (1 .- txi) .* teta
+
+    coef =1
+    L = zeros(4, 4)
+
+    for i1 in 1:4
+        for i2 in 1:4
+            UxV = ub[i1, :] .* ub[i2, :]
+            integrand = coef .* UxV
+            L[i1, i2] = sum(Omega .* integrand)
         end
     end
-    return neigh
+
+    L *= hx / 2 * hy / 2
+    return L
 end
+
 
 # ╔═╡ 674a0d3c-ec92-4701-ac7a-f5d5cea3a134
 function NMassmatrix(M::Matrix{Int64}, v::Matrix{Float64}, coeff::Vector{Float64}, mesh::Dict{Symbol, Real})
@@ -437,6 +569,9 @@ function NMassmatrix(M::Matrix{Int64}, v::Matrix{Float64}, coeff::Vector{Float64
 end
 
 
+
+# ╔═╡ 37029624-8a50-453f-b311-f1ed93ecf007
+md""" We can use then the following function to compute the eigenvalues and eigenvectors in each neighborhood. In this simple example we use the Julia eigenvalue problem solver to obtain the numerical eigenvalues and eigenvectors."""
 
 # ╔═╡ c234ee86-e95f-4b5a-9086-21e2e04ff5c7
 begin
@@ -518,9 +653,71 @@ function localeigenvectors(x, neigh, Nx, Ny, add, Elements, vertex_list, coeffic
         end
     end
 
-    return neigh
+#    return neigh
 end
 end
+
+# ╔═╡ 51940ba3-8508-4edd-a4b9-98d4f974ac1e
+neigh[1,1].lambda
+
+# ╔═╡ e0683b22-c74f-435c-be30-f17b574f14ca
+md""" We also need a partition of unity. For this simple example we use $Q^1(\mathcal{T}^H)$ as our partition of unity. The correspodng computation is done in the following functions."""
+
+# ╔═╡ 26e66683-c592-46e1-bcf7-9534a4f5d251
+function phiI(c::Vector{Float64}, diamx::Float64, diamy::Float64, vx::Vector{Float64}, vy::Vector{Float64})
+    x = (1 .- 2 .* abs.(vx .- c[1]) ./ diamx)
+    y = (1 .- 2 .* abs.(vy .- c[2]) ./ diamy)
+    z = x .* y
+    return z
+end
+
+
+# ╔═╡ a3b63bfd-663f-4698-ae30-102b30fa1267
+function linearones(neigh, Nx, Ny, b, vertex_list)
+	aux=0
+    for i1 in 1:Nx+1
+        for i2 in 1:Ny+1
+            xlin = b*0
+            c = neigh[i1, i2].c
+			#aux= neigh[i1, i2].diam[:x]
+            diamx = neigh[i1, i2].diam[:x]
+            diamy = neigh[i1, i2].diam[:y]
+            Ig = neigh[i1, i2].nodes
+            vx = vertex_list[Ig]
+            vy = vertex_list[Ig,2]
+            xlin[Ig] = phiI(c, diamx, diamy, vx, vy)
+			#aux = phiI(c, diamx, diamy, vx, vy)
+            neigh[i1, i2].philin = xlin
+
+
+        end
+    end
+   # return neigh
+end
+
+# ╔═╡ a185ee5f-3bc2-42d8-87e2-9822ee9d19ff
+linearones(neigh,Nx,Ny,bfinegrid,vertex_list)
+
+# ╔═╡ c0acf7a8-e37d-4c48-aee5-9bbf8453d198
+md"""
+
+Using the partition of unity functions we then construct a set of  multiscale basis functions given by
+$\chi_i \psi^{\omega_i}_\ell$ for selected eigenvectors $\psi^{\omega_i}_\ell$. We use
+$L_i+L$ to denote the number of basis functions from the coarse region $\omega_i$. Here $L_i$ denote the minimal number of functions to use (these are the corresponding to the eigenvalue that vanishg as the contrast increases) and $L$ denotes the number of additional basis functions chosen in order to improve the multiscale approximation. 
+
+We then define the coarse GMsFEM space by
+
+$V_0=\mbox{span}\{\Phi_{i,\ell}=\chi_i \psi_\ell^{\omega_i},\quad i=1,\dots,N_v,\quad \ell=1,\dots,L_i+L\}.$
+
+The data needed is computed in the following functions.
+
+"""
+
+# ╔═╡ 978d1777-66eb-4af4-8266-91f00bf7c46d
+additional_basis =1; ##  -number of additional basis.
+
+# ╔═╡ ba3582d8-48a6-4db7-b83e-0fdc0ca15715
+localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
 
 # ╔═╡ 3b9ead45-5917-4874-b4c2-4ebbb6545e4b
 function GMsFEMbasis(neigh::Matrix{Neighborhood}, Nx::Int, Ny::Int)
@@ -550,15 +747,41 @@ function GMsFEMbasis(neigh::Matrix{Neighborhood}, Nx::Int, Ny::Int)
 #			returnaux=neigh[i1,i2].cb
         end
     end
-    return neigh
+   # return neigh
 end
 
 
-# ╔═╡ 178e0902-c2c7-4bf3-8b6b-0c1e0066253f
-function boundary_condition(x,y)
+# ╔═╡ 14163b19-0b4f-4518-8bbc-66abc6796a30
+GMsFEMbasis(neigh, Nx, Ny)
 
-z=y.^2 .+1-x/128;
-end
+# ╔═╡ 17f2821c-c15e-44c2-af4c-4613995aa7cc
+md"""We can use plot to visualize some of the coarse basis funcions. """
+
+# ╔═╡ 6b4cce39-3be4-4965-a5b4-264ea8e07444
+md""" 
+For more details, motivation of the construction, and approximation properties of the space $V_0$ as well as the choice of the initial partition of unity basis functions we refer the interested reader to  the references.
+"""
+
+# ╔═╡ dc99dfde-3e4d-48fb-a9df-6e2edd45767b
+md""" 
+Summarizing, for the multiscale approximation of the pressure we use the GMsFEM coarse space $V_0$ constructed in 
+this section. More precisely, let 
+
+$R_0= [\Phi_{1,1}, \Phi_{1,2},\dots, \Phi_{N_v,L_{N_v+L}} ]$ 
+
+the matrix whose columns correspond to the coarse basis functions, that is, the column space of $R_0$ is $V_0$. Instead of solving the fine-scale linear system 
+
+$A_0 u_0 = b_0$
+
+where 
+
+$A_0 =R_0^T A_hR_0 \quad \mbox{ and } \quad b_0=R_0^Tb$.
+
+We have the multiscale approximation $u_h\approx R_0u_0$.
+"""
+
+# ╔═╡ 65f944f7-7adc-45a4-8df5-2afc24d3f343
+md""" The matrix $R_0$ can be constructed as follows ."""
 
 # ╔═╡ e273d043-82b3-4375-b8cc-dcb3104993fd
 function matrixR_GMsFEM(b,neigh,Nx,Ny)
@@ -616,64 +839,44 @@ x0d[dirn]=x0d_aux
 	return R0,free,x0d, dirn,x0d_aux, X
 end
 
+# ╔═╡ 6f2b93b6-4cd1-4563-959e-2a1d781bb422
+R0GMsFEM,free0G,x0dG=matrixR_GMsFEM(bfinegrid,neigh,Nx,Ny);
+
+# ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
+plot(reshape(R0GMsFEM[:,100],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+
+# ╔═╡ 06a9872f-9505-4e34-a1a9-3c9ea5dba188
+md"""
+The coarse matrix and right hand side vector are computed as follows.
+"""
+
+# ╔═╡ 9e9e0ff5-85a6-46ef-84ab-aeac0c696766
+begin
+	A0GMsFEM=R0GMsFEM'*Afinegrid*R0GMsFEM;
+	b0G=R0GMsFEM'*bfinegrid-A0GMsFEM*x0dG;
+end
+
+# ╔═╡ 554e7743-b0fb-494e-a445-990f31469920
+md""" Finally, the GMsFEM approximation can be computed as follows."""
+
 # ╔═╡ ba81e6db-71a1-443a-aa9a-b81f330a7a9a
 function compute_GMsFEMpressure(A0GMsFEM,b0G,R0GMsFEM,free0G,x0dG)
 
-z0auxG=A0GMsFEM[free0G,free0G] \b0G[free0G];
-z0G=copy(x0dG);
-z0G[free0G]=z0auxG;
-downz0G=R0GMsFEM*z0G;
+	z0auxG=A0GMsFEM[free0G,free0G] \b0G[free0G];
+	z0G=copy(x0dG);
+	z0G[free0G]=z0auxG;
+	downz0G=R0GMsFEM*z0G;
 	return downz0G
 end
 
-# ╔═╡ 5f86db66-3328-4d80-a0bd-88076571f1c5
-begin
-ax = 0; bx = 1; ay = 0; by = 1; intx = [ax, bx]; inty = [ay, by]
-Nx = 10;Ny = 10; nx = 4 ;ny = 4; additional_basis =3;
-
-Elements, Boundary, vertex_list, mesh_parameter, h, boundary_nodes, free = square_mesh(nx, ny, Nx, Ny, intx, inty)
-
-K = 10000*rand(Nx*nx, Ny*ny)
-coefficient_values_aux = 1 .+  K[1:Nx*nx, 1:Ny*ny]
-coefficient_values = coefficient_values_aux[:]
-
-#Fine grid matrices	
-Afinegrid,bfinegrid=Nmatrix(Elements,vertex_list,coefficient_values,mesh_parameter)
-
-#Fine scale solution	
-xdfine=boundary_condition(vertex_list[:,1],vertex_list[:,2]);
-bfinegrid_corrected=bfinegrid-Afinegrid*xdfine;
-pfineaux=bfinegrid*0;
-pfineaux[free]=Afinegrid[free,free]\bfinegrid_corrected[free]
-pfine=xdfine+pfineaux
-	
-#Neighborhoods
-neigh=neighborhoods(ax,bx,ay,by,Nx,Ny,nx,ny)
-
-neigh=localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter)
-neigh=linearones(neigh,Nx,Ny,bfinegrid,vertex_list)
-neigh=GMsFEMbasis(neigh, Nx, Ny)
-R0GMsFEM,free0G,x0dG=matrixR_GMsFEM(bfinegrid,neigh,Nx,Ny);
-A0GMsFEM=R0GMsFEM'*Afinegrid*R0GMsFEM
-b0G=R0GMsFEM'*bfinegrid-A0GMsFEM*x0dG;
-
-	
-
+# ╔═╡ 0da09e47-b072-480b-b8d2-af04f96d17b6
 downz0G=compute_GMsFEMpressure(A0GMsFEM,b0G,R0GMsFEM,free0G,x0dG);
-0
-end
+
+# ╔═╡ 781ac9a1-305b-4af6-a377-825534b33db0
+md""" We can use plot to visualize the GMsFEM approximation."""
 
 # ╔═╡ 1ed3a75a-9811-41b2-a774-ab983854afc5
 plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
-
-# ╔═╡ b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
-plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))	
-
-# ╔═╡ 6c343166-2098-47b0-afc6-a39b2326198a
-plot(reshape(R0GMsFEM*x0dG,Nx*nx+1,Ny*ny+1),st=:surface,camera=(10,50),color=cgrad(:jet))
-
-# ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
-plot(reshape(R0GMsFEM[:,6],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1741,25 +1944,62 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╠═00ff805d-d9c1-4312-a5a3-ba173205db39
-# ╠═5f86db66-3328-4d80-a0bd-88076571f1c5
-# ╠═1ed3a75a-9811-41b2-a774-ab983854afc5
-# ╠═b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
-# ╠═6c343166-2098-47b0-afc6-a39b2326198a
-# ╠═977a3d42-71b5-414b-bc0d-00b154e0dd82
-# ╠═a8783a10-f9b7-454c-b985-c2e41d6be960
-# ╠═5ad0cb95-7ed2-4030-b6ce-9790f1772ba6
-# ╠═0d89d5af-05ca-43ac-b397-f3e036ff9ef4
-# ╠═3e140131-d3b8-4369-8e68-c1daf6ff9d2c
+# ╟─70650d20-4f57-47c5-9a17-22ee97222a6c
+# ╟─d39d4a1d-0972-468f-b931-d097d39ea182
 # ╠═544752c6-fa7d-4dea-a7fa-e625f966df93
-# ╠═d0a533b0-9a70-4e61-ace4-64f6fb789448
-# ╠═7696d9b6-b389-436d-b0db-fa05be494628
-# ╠═c234ee86-e95f-4b5a-9086-21e2e04ff5c7
-# ╠═a3b63bfd-663f-4698-ae30-102b30fa1267
-# ╠═26e66683-c592-46e1-bcf7-9534a4f5d251
-# ╠═674a0d3c-ec92-4701-ac7a-f5d5cea3a134
-# ╠═3b9ead45-5917-4874-b4c2-4ebbb6545e4b
-# ╠═e273d043-82b3-4375-b8cc-dcb3104993fd
 # ╠═178e0902-c2c7-4bf3-8b6b-0c1e0066253f
+# ╟─6336610a-c17b-41d8-ad88-43901bbde98c
+# ╟─56cf4d5e-e309-451f-9b03-7d15fa776a33
+# ╟─3b04b465-1ba9-41a6-bdb7-694baf08e03a
+# ╟─a8783a10-f9b7-454c-b985-c2e41d6be960
+# ╠═d53cca98-a87c-4dc6-aee9-836903b619b1
+# ╟─bf49c378-19fd-4f3b-8981-c58822f4cae8
+# ╟─5ad0cb95-7ed2-4030-b6ce-9790f1772ba6
+# ╟─3e140131-d3b8-4369-8e68-c1daf6ff9d2c
+# ╟─3371ae2b-8285-499a-bcd4-1e2eef1202b7
+# ╠═6dab157d-b945-4141-90d9-8cf955ba1de6
+# ╠═c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
+# ╟─d0a533b0-9a70-4e61-ace4-64f6fb789448
+# ╠═b39e8d4d-10c5-49c1-b63a-85a006a45e55
+# ╠═f6988d22-7c89-4f09-9f7d-72935a0c62f0
+# ╠═1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
+# ╠═50ae23c5-ac63-49d3-b841-66a41516fe43
+# ╟─31a2b7ed-74f3-495a-a9b7-9eeab2ba79c2
+# ╠═b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
+# ╟─3ce90889-e2f7-4c19-8c1e-c5353686dcba
+# ╟─7668b780-299e-492e-859c-57acd0d6b4f0
+# ╟─c1fa4106-2c9f-42aa-8aca-f3f4ffe0300a
+# ╟─7696d9b6-b389-436d-b0db-fa05be494628
+# ╠═615e4804-9fcd-4265-9514-abfa981d5908
+# ╠═fb131848-d26b-461b-982c-7adbbda3c8ad
+# ╟─b0f44a41-0236-4890-8b4f-d9c9ede361ba
+# ╟─0d89d5af-05ca-43ac-b397-f3e036ff9ef4
+# ╟─674a0d3c-ec92-4701-ac7a-f5d5cea3a134
+# ╟─37029624-8a50-453f-b311-f1ed93ecf007
+# ╟─c234ee86-e95f-4b5a-9086-21e2e04ff5c7
+# ╠═ba3582d8-48a6-4db7-b83e-0fdc0ca15715
+# ╟─51940ba3-8508-4edd-a4b9-98d4f974ac1e
+# ╟─e0683b22-c74f-435c-be30-f17b574f14ca
+# ╟─26e66683-c592-46e1-bcf7-9534a4f5d251
+# ╟─a3b63bfd-663f-4698-ae30-102b30fa1267
+# ╠═a185ee5f-3bc2-42d8-87e2-9822ee9d19ff
+# ╟─c0acf7a8-e37d-4c48-aee5-9bbf8453d198
+# ╠═978d1777-66eb-4af4-8266-91f00bf7c46d
+# ╟─3b9ead45-5917-4874-b4c2-4ebbb6545e4b
+# ╠═14163b19-0b4f-4518-8bbc-66abc6796a30
+# ╟─17f2821c-c15e-44c2-af4c-4613995aa7cc
+# ╠═977a3d42-71b5-414b-bc0d-00b154e0dd82
+# ╟─6b4cce39-3be4-4965-a5b4-264ea8e07444
+# ╟─dc99dfde-3e4d-48fb-a9df-6e2edd45767b
+# ╟─65f944f7-7adc-45a4-8df5-2afc24d3f343
+# ╟─e273d043-82b3-4375-b8cc-dcb3104993fd
+# ╠═6f2b93b6-4cd1-4563-959e-2a1d781bb422
+# ╟─06a9872f-9505-4e34-a1a9-3c9ea5dba188
+# ╠═9e9e0ff5-85a6-46ef-84ab-aeac0c696766
+# ╠═554e7743-b0fb-494e-a445-990f31469920
 # ╠═ba81e6db-71a1-443a-aa9a-b81f330a7a9a
+# ╠═0da09e47-b072-480b-b8d2-af04f96d17b6
+# ╟─781ac9a1-305b-4af6-a377-825534b33db0
+# ╠═1ed3a75a-9811-41b2-a774-ab983854afc5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
