@@ -379,7 +379,7 @@ end
 md""" We can use plot to visualize the reference solution."""
 
 # ╔═╡ b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
-plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))	
+plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(-50,40),color=cgrad(:jet))	
 
 # ╔═╡ 21a9498c-8c53-481d-a419-7c943cbe7557
 md""" # Coarse mesh and neighborhoods"""
