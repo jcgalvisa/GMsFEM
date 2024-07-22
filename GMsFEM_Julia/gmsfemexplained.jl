@@ -15,7 +15,7 @@ PlutoUI.TableOfContents(title="GMsFEM from scracth!", aside=true)
 
 # ╔═╡ 9a843ac4-16bb-4971-85c4-5cd2699a9273
 md"""# Introduction 
-In this notebook, we present a simple implementation showing the main ideas of the GMsFEM method introduced in [1,2,3,4,5] and references therein.  We consider a simple case of the Darcy equation in heterogeneous multiscale porous media in a rectangular two-dimensional domain with square fine and coarse mesh. 
+In this notebook, we provide a straightforward implementation that illustrates the key concepts of the GMsFEM method, as introduced in references [1,2,3,4,5] and related works. Specifically, we examine a simple scenario involving the Darcy equation within heterogeneous multiscale porous media. Our study takes place in a rectangular two-dimensional domain, utilizing both fine and coarse square meshes. For related works see [GMsFEM](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=GMsFEM&btnG=).
 """
 
 # ╔═╡ c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
@@ -915,7 +915,7 @@ md""" We can use plot to visualize the GMsFEM approximation."""
 plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
 
 # ╔═╡ 0d30ed9e-43b2-4df3-a7f9-bfe34d3503b7
-md"""# References 
+md"""# Selected references 
 
 [1] J Galvis, Y Efendiev. Domain decomposition preconditioners for multiscale flows in high contrast media. Multiscale Model. Simul. 8 (4), 1461-1483, 2010.
 
