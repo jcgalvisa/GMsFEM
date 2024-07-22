@@ -13,6 +13,13 @@ using LinearAlgebra, SparseArrays, Plots
 # ╔═╡ 6991ca8d-9e0b-4ee1-a280-93246f4466b0
 PlutoUI.TableOfContents(title="GMsFEM from scracth!", aside=true)
 
+# ╔═╡ c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
+md""" # Julia and pluto
+
+For Julia see [Julia](https://julialang.org/), for Pluto see [Pluto](https://plutojl.org/).
+
+"""
+
 # ╔═╡ e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
 md""" # The fine grid problem"""
 
@@ -2007,8 +2014,9 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╟─6f581f8a-6596-438e-bd0d-5af1aacd383a
-# ╟─6991ca8d-9e0b-4ee1-a280-93246f4466b0
-# ╟─e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
+# ╠═6991ca8d-9e0b-4ee1-a280-93246f4466b0
+# ╟─c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
+# ╠═e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
 # ╠═00ff805d-d9c1-4312-a5a3-ba173205db39
 # ╟─70650d20-4f57-47c5-9a17-22ee97222a6c
 # ╟─d39d4a1d-0972-468f-b931-d097d39ea182
