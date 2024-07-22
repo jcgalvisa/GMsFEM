@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -24,7 +24,7 @@ main concept of GMsFEM. We consider
 
 $-\mbox{div}(\kappa(x)\nabla u)=f\ \text{in}\ D,$
 
-$u=g$ on $\partial D$.
+$u=g \text{ on } \partial D.$
 """
 
 # ╔═╡ d39d4a1d-0972-468f-b931-d097d39ea182
@@ -43,8 +43,9 @@ end
 
 # ╔═╡ 6336610a-c17b-41d8-ad88-43901bbde98c
 md"""
- A variational formulation of problem \eqref{eq:problem1} is: 
-Find $p\in H^1(\Omega)$ with $(p-g)\in H_{0}^1=\left\{w\in H^1(\Omega) : w|_{\partial\Omega}=0\right\}$ such that
+ A variational formulation of problem \eqref{eq:problem1} is: Given an extension
+of $g$, $\mathcal{E}g\in H^1$, 
+find $p\in H^1(\Omega)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(\Omega) : w|_{\partial\Omega}=0\right\}$ such that
 
 $a(p,v)=\ell(v) \quad \mbox{ for all } v\in H_0^1(\Omega),$
 
@@ -179,7 +180,7 @@ begin
 	ax = 0; bx = 1; ay = 0; by = 1; intx = [ax, bx]; inty = [ay, by]
 	Nx =5 ;Ny = 5; nx = 5;ny = 5; 
 	
-	Elements, Boundary, vertex_list, mesh_parameter, h, boundary_nodes, free = square_mesh(nx, ny, Nx, Ny, intx, inty)
+	Elements, Boundary, vertex_list, mesh_parameter, h, boundary_nodes, free = square_mesh(nx, ny, Nx, Ny, intx, inty);
 end
 
 # ╔═╡ bf49c378-19fd-4f3b-8981-c58822f4cae8
@@ -352,9 +353,6 @@ function Nmatrix(M::Matrix{Int64}, v::Matrix{Float64}, coef::Vector{Float64}, me
     return A, b
 end
 end
-
-# ╔═╡ b39e8d4d-10c5-49c1-b63a-85a006a45e55
-
 
 # ╔═╡ f6988d22-7c89-4f09-9f7d-72935a0c62f0
 
@@ -918,7 +916,7 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.0"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "26e7ac2f30526d8edd0520b372068ae00ab0625f"
 
@@ -1004,7 +1002,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.5+1"
+version = "1.1.0+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -1425,7 +1423,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+2"
+version = "0.3.23+4"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -2015,7 +2013,7 @@ version = "1.4.1+1"
 # ╟─70650d20-4f57-47c5-9a17-22ee97222a6c
 # ╟─d39d4a1d-0972-468f-b931-d097d39ea182
 # ╠═544752c6-fa7d-4dea-a7fa-e625f966df93
-# ╠═178e0902-c2c7-4bf3-8b6b-0c1e0066253f
+# ╟─178e0902-c2c7-4bf3-8b6b-0c1e0066253f
 # ╟─6336610a-c17b-41d8-ad88-43901bbde98c
 # ╟─56cf4d5e-e309-451f-9b03-7d15fa776a33
 # ╟─3b04b465-1ba9-41a6-bdb7-694baf08e03a
@@ -2025,12 +2023,11 @@ version = "1.4.1+1"
 # ╟─5ad0cb95-7ed2-4030-b6ce-9790f1772ba6
 # ╟─3e140131-d3b8-4369-8e68-c1daf6ff9d2c
 # ╟─3371ae2b-8285-499a-bcd4-1e2eef1202b7
-# ╠═6dab157d-b945-4141-90d9-8cf955ba1de6
+# ╟─6dab157d-b945-4141-90d9-8cf955ba1de6
 # ╠═c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
 # ╟─d0a533b0-9a70-4e61-ace4-64f6fb789448
-# ╠═b39e8d4d-10c5-49c1-b63a-85a006a45e55
 # ╠═f6988d22-7c89-4f09-9f7d-72935a0c62f0
-# ╠═1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
+# ╟─1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
 # ╠═50ae23c5-ac63-49d3-b841-66a41516fe43
 # ╟─31a2b7ed-74f3-495a-a9b7-9eeab2ba79c2
 # ╠═b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
