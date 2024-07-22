@@ -13,13 +13,18 @@ using LinearAlgebra, SparseArrays, Plots
 # ╔═╡ 6991ca8d-9e0b-4ee1-a280-93246f4466b0
 PlutoUI.TableOfContents(title="GMsFEM from scracth!", aside=true)
 
+# ╔═╡ 9a843ac4-16bb-4971-85c4-5cd2699a9273
+md"""# Introduction 
+In this notebook, we present a simple implementation showing the main ideas of the GMsFEM method introduced in [1,2,3,4,5] and references therein.  We consider a simple case of the Darcy equation in heterogeneous multiscale porous media in a rectangular two-dimensional domain with square fine and coarse mesh. 
+"""
+
 # ╔═╡ c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
 md""" # Julia and Pluto
 
-For Julia see [Julia](https://julialang.org/), for Pluto see [Pluto](https://plutojl.org/). Julia version by J.Galvis and Karina Sarmiento.
+The implementation is written in  [Julia](https://julialang.org/) and we use [Pluto](https://plutojl.org/). J. Galvis and Karina Sarmiento prepared the Julia version. If you have any comments or questions, please write an email to `jcgalvisa@unal.edu.co`.
 
 #  MatLab/Octave
-For MatLab implementation see [GMsFEM](https://github.com/jcgalvisa/GMsFEM).
+For a previous MatLab implementation see [Matlab GMsFEM](https://github.com/jcgalvisa/GMsFEM).
 """
 
 # ╔═╡ e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
@@ -52,27 +57,27 @@ end
 
 # ╔═╡ 6336610a-c17b-41d8-ad88-43901bbde98c
 md"""
- A variational formulation of problem \eqref{eq:problem1} is: Given an extension
-of $g$, $\mathcal{E}g\in H^1$, 
-find $p\in H^1(\Omega)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(\Omega) : w|_{\partial\Omega}=0\right\}$ such that
+ A variational formulation of the problem is: Given an extension
+of $g$, $\mathcal{E}g\in H^1(D)$, 
+find $p\in H^1(D)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(D) : w|_{\partial\D}=0\right\}$ such that
 
 $a(p,v)=\ell(v) \quad \mbox{ for all } v\in H_0^1(\Omega),$
 
 where the bilinear form $a$  is defined by
 
-$a(p,v)=\int_\Omega \kappa (x)\nabla p(x)\nabla v(x) dx,$
+$a(p,v)=\int_D \kappa (x)\nabla p(x)\nabla v(x) dx,$
 
 and the functional $\ell$ is defined by 
 
-$\ell(v)=\int_\Omega f(x)v(x)dx,$
+$\ell(v)=\int_D f(x)v(x)dx,$
 
-for $p,v\in H_0^1(\Omega)$. 
+for $p,v\in H_0^1(D)$. 
 """
 
 # ╔═╡ 56cf4d5e-e309-451f-9b03-7d15fa776a33
 md"""
- Let $\tau^h$ be a triangulation of the domain $\Omega$.  As it is usual in multiscale methods, we assume that $h$ is fine enough to completely describe all the variations of the coefficient $\kappa$ and 
-therefore we refer to $\tau^h$ as the fine mesh.  We denote by $V^h(\Omega)$ the usual finite elements discretization of piecewise linear (or bilinear) continuous functions with respect to $\tau^h$. Denote by $V_0^h(\Omega)$ the subset of $V^h(\Omega)$ made of functions that vanish on $\partial\Omega$. 
+ Let $\tau^h$ be a triangulation of the domain $D$.  As it is usual in multiscale methods, we assume that $h$ is fine enough to completely describe all the variations of the coefficient $\kappa$ and 
+therefore we refer to $\tau^h$ as the fine mesh.  We denote by $V^h(D)$ the usual finite elements discretization of piecewise linear (or bilinear) continuous functions with respect to $\tau^h$. Denote by $V_0^h(D)$ the subset of $V^h(D)$ made of functions that vanish on $\partial D$. 
 
 The Galerkin formulation leads to the solution of the (fine-grid) linear system
 
@@ -80,13 +85,13 @@ $A_h u_h=b_h$
 
 where 
 
-$u^TAv=\int_{\Omega} \kappa\nabla u\nabla v\text{,}$
+$u^TAv=\int_{D} \kappa\nabla u\nabla v\text{,}$
 
 """
 
 # ╔═╡ 3b04b465-1ba9-41a6-bdb7-694baf08e03a
-md""" For the very simple example presented here we consider $\Omega=I_x\times I_y$ and a fine mesh made of squares. 
-For later use introduce $N_x$ and $N_y$, the number of coarse blocks in the $x$ and $y$ direction and $n_x$ and $n_y$ the number of fine grid elements in each direction. In total we have a fine grid made of $N_xn_xN_yn_y$ elements.
+md""" For the very simple example presented here we consider $D=I_x\times I_y$ and a fine mesh made of squares. 
+For later use introduce $N_x$ and $N_y$, the number of coarse blocks in the $x$ and $y$ direction and, for every coarse block, $n_x$ and $n_y$ is the number of fine grid elements in each direction. In total, we have a fine grid made of $N_xn_xN_yn_y$ elements.
 
 The following Julia function creates such a mesh. Here `intx` and  `inty` denote the intervals in each direction.
 """
@@ -327,10 +332,10 @@ end
 end
 
 # ╔═╡ 3371ae2b-8285-499a-bcd4-1e2eef1202b7
-md""" For our simple example the forcing term is coded in the following function."""
+md""" For our simple example the forcing term is shown above."""
 
 # ╔═╡ 6dab157d-b945-4141-90d9-8cf955ba1de6
-md""" Then we construct global matrices and vectors. For our simple example the coefficient is a matrix $\kappa$ of size $N_y*n_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. """
+md""" Then, we construct global matrices and vectors. For our simple example, the coefficient is a matrix $\kappa$ of size $N_y*n_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. To have a working example, let us generate a random coefficient as follows. """
 
 # ╔═╡ c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
 begin
@@ -338,6 +343,9 @@ begin
 	coefficient_values_aux = 1 .+  K[1:Nx*nx, 1:Ny*ny]
 	coefficient_values = coefficient_values_aux[:]
 end
+
+# ╔═╡ b033c5d0-9e23-4676-8f71-f74f08f92414
+md""" The function that loops over fine grid elements and assamble the find grid matrix and the fine grid load vector is writen next."""
 
 # ╔═╡ d0a533b0-9a70-4e61-ace4-64f6fb789448
 begin
@@ -369,13 +377,12 @@ end
 Afinegrid,bfinegrid=Nmatrix(Elements,vertex_list,coefficient_values,mesh_parameter)
 
 # ╔═╡ 1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
-md""" We can then use Julia solver to compute the fine-grid solution. We will refere to this solution as the reference solution. We need to impose the Dirichlet boundary condition for our simple example."""
+md""" We can then use Julia solver to compute the fine-grid solution. We will refere to this solution as the reference solution. We have chosen  to impose the Dirichlet boundary condition for our simple example."""
 
 # ╔═╡ 50ae23c5-ac63-49d3-b841-66a41516fe43
 begin
 	#Fine scale solution	
 	xdfine=boundary_condition(vertex_list[:,1],vertex_list[:,2]);
-	xdfine2=xdfine*0
 	bfinegrid_corrected=bfinegrid-Afinegrid*xdfine;
 	pfineaux=bfinegrid*0;
 	pfineaux[free]=Afinegrid[free,free]\bfinegrid_corrected[free]
@@ -393,8 +400,7 @@ md""" # Coarse mesh and neighborhoods"""
 
 # ╔═╡ 3ce90889-e2f7-4c19-8c1e-c5353686dcba
 md"""
-This fine-grid sistem is very large and ill-conditioned and in many situations it is impractical to solve it using and itertive method. Besides of preconditioning, constructing small subspaces (referred to as coarse subspaces) that can capture main properties of the solution. GMsFEM can be viewed as a succesfull methodology to construct coarse spaces.
-
+This fine-grid system is very large and ill-conditioned and in many situations, it is impractical to solve it using an itertive method. Besides preconditioning [1,2], we can construct small subspaces (referred to as coarse subspaces) that can capture the main properties of the solution. GMsFEM can be viewed as a successful methodology to construct coarse spaces, [3,4,5].
 """
 
 # ╔═╡ 7668b780-299e-492e-859c-57acd0d6b4f0
@@ -786,7 +792,7 @@ md"""We can use plot to visualize some of the coarse basis funcions. """
 
 # ╔═╡ 6b4cce39-3be4-4965-a5b4-264ea8e07444
 md""" 
-For more details, motivation of the construction, and approximation properties of the space $V_0$ as well as the choice of the initial partition of unity basis functions we refer the interested reader to  the references.
+For more details, motivation of the construction, and approximation properties of the space $V_0$ as well as the choice of the initial partition of unity basis functions we refer the interested reader to [1-5].
 """
 
 # ╔═╡ e5869ea3-d78a-4094-bb7b-d5fb88e59d51
@@ -907,6 +913,21 @@ md""" We can use plot to visualize the GMsFEM approximation."""
 
 # ╔═╡ 1ed3a75a-9811-41b2-a774-ab983854afc5
 plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+
+# ╔═╡ 0d30ed9e-43b2-4df3-a7f9-bfe34d3503b7
+md"""# References 
+
+[1] J Galvis, Y Efendiev. Domain decomposition preconditioners for multiscale flows in high contrast media. Multiscale Model. Simul. 8 (4), 1461-1483, 2010.
+
+[2]  J Galvis, Y Efendiev. Domain decomposition preconditioners for multiscale flows in high contrast media: reduced dimension coarse spaces. Multiscale Modeling & Simulation 8 (5), 1621-1644, 2010
+
+[3] Y Efendiev, J Galvis, TY Hou. Generalized multiscale finite element methods (GMsFEM). Journal of computational physics 251, 116-135, 2013.
+
+[4] Y Efendiev, J Galvis, XH Wu, Multiscale finite element methods for high-contrast problems using local spectral basis functions, Journal of Computational Physics 230 (4), 937-955.
+
+[5] Eduardo Abreu, Ciro Díaz, J Galvis. A convergence analysis of Generalized Multiscale Finite Element Methods. Journal of Computational Physics 396 (1), 303-324.
+
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2017,13 +2038,14 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╟─6f581f8a-6596-438e-bd0d-5af1aacd383a
 # ╟─6991ca8d-9e0b-4ee1-a280-93246f4466b0
+# ╟─9a843ac4-16bb-4971-85c4-5cd2699a9273
 # ╟─c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
 # ╟─e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
 # ╠═00ff805d-d9c1-4312-a5a3-ba173205db39
 # ╟─70650d20-4f57-47c5-9a17-22ee97222a6c
 # ╟─d39d4a1d-0972-468f-b931-d097d39ea182
 # ╠═544752c6-fa7d-4dea-a7fa-e625f966df93
-# ╟─178e0902-c2c7-4bf3-8b6b-0c1e0066253f
+# ╠═178e0902-c2c7-4bf3-8b6b-0c1e0066253f
 # ╟─6336610a-c17b-41d8-ad88-43901bbde98c
 # ╟─56cf4d5e-e309-451f-9b03-7d15fa776a33
 # ╟─3b04b465-1ba9-41a6-bdb7-694baf08e03a
@@ -2035,6 +2057,7 @@ version = "1.4.1+1"
 # ╟─3371ae2b-8285-499a-bcd4-1e2eef1202b7
 # ╟─6dab157d-b945-4141-90d9-8cf955ba1de6
 # ╠═c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
+# ╟─b033c5d0-9e23-4676-8f71-f74f08f92414
 # ╟─d0a533b0-9a70-4e61-ace4-64f6fb789448
 # ╠═f6988d22-7c89-4f09-9f7d-72935a0c62f0
 # ╟─1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
@@ -2075,10 +2098,11 @@ version = "1.4.1+1"
 # ╠═6f2b93b6-4cd1-4563-959e-2a1d781bb422
 # ╟─06a9872f-9505-4e34-a1a9-3c9ea5dba188
 # ╠═9e9e0ff5-85a6-46ef-84ab-aeac0c696766
-# ╠═554e7743-b0fb-494e-a445-990f31469920
+# ╟─554e7743-b0fb-494e-a445-990f31469920
 # ╠═ba81e6db-71a1-443a-aa9a-b81f330a7a9a
 # ╠═0da09e47-b072-480b-b8d2-af04f96d17b6
 # ╟─781ac9a1-305b-4af6-a377-825534b33db0
 # ╠═1ed3a75a-9811-41b2-a774-ab983854afc5
+# ╟─0d30ed9e-43b2-4df3-a7f9-bfe34d3503b7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
