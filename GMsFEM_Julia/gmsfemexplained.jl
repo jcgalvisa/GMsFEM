@@ -14,11 +14,11 @@ using LinearAlgebra, SparseArrays, Plots
 PlutoUI.TableOfContents(title="GMsFEM from scracth!", aside=true)
 
 # ╔═╡ c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
-md""" # Julia and Pluto. 
+md""" # Julia and Pluto
 
-For Julia see [Julia](https://julialang.org/), for Pluto see [Pluto](https://plutojl.org/). 
+For Julia see [Julia](https://julialang.org/), for Pluto see [Pluto](https://plutojl.org/). Julia version by J.Galvis and Karina Sarmiento.
 
-#  MatLab
+#  MatLab/Octave
 For MatLab implementation see [GMsFEM](https://github.com/jcgalvisa/GMsFEM).
 """
 
