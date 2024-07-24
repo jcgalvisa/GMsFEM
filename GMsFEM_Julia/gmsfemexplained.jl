@@ -59,7 +59,7 @@ end
 md"""
  A variational formulation of the problem is: Given an extension
 of $g$, $\mathcal{E}g\in H^1(D)$, 
-find $p\in H^1(D)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(D) : w|_{\partial\D}=0\right\}$ such that
+find $p\in H^1(D)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(D) : w|_{\partial D}=0\right\}$ such that
 
 $a(p,v)=\ell(v) \quad \mbox{ for all } v\in H_0^1(\Omega),$
 
@@ -85,7 +85,7 @@ $A_h u_h=b_h$
 
 where 
 
-$u^TAv=\int_{D} \kappa\nabla u\nabla v\text{,}$
+$u^TAv=\int_{D} \kappa\nabla u\nabla v.$
 
 """
 
@@ -335,7 +335,7 @@ end
 md""" For our simple example the forcing term is shown above."""
 
 # ╔═╡ 6dab157d-b945-4141-90d9-8cf955ba1de6
-md""" Then, we construct global matrices and vectors. For our simple example, the coefficient is a matrix $\kappa$ of size $N_y*n_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. To have a working example, let us generate a random coefficient as follows. """
+md""" Then, we construct global matrices and vectors. For our simple example, the coefficient is a matrix $\kappa$ of size $N_yn_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. To have a working example, let us generate a random coefficient as follows. """
 
 # ╔═╡ c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
 begin
