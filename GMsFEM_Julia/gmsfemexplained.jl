@@ -606,9 +606,6 @@ md""" We can use then the following function to compute the eigenvalues and eige
 md"""  We save only 
 $L_i+L$ eigenvectors for the neighboorhod $\omega_i$. Here $L_i$ denote the minimal number of functions to use (these are the corresponding to the eigenvalue that vanishg as the contrast increases) and $L$ denotes the number of additional basis functions chosen in order to improve the multiscale approximation.""" 
 
-# ╔═╡ 978d1777-66eb-4af4-8266-91f00bf7c46d
-additional_basis =5; ##  -number of additional basis.
-
 # ╔═╡ c234ee86-e95f-4b5a-9086-21e2e04ff5c7
 begin
 function localeigenvectors(x, neigh, Nx, Ny, add, Elements, vertex_list, coefficient_values, mesh_parameter)
@@ -694,7 +691,13 @@ end
 end
 
 # ╔═╡ ba3582d8-48a6-4db7-b83e-0fdc0ca15715
-localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
+begin
+	additional_basis =0;
+	localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
+end
+
+# ╔═╡ 327d7c78-b74b-4035-9b23-91397621700e
+neigh[2,2].Nbad
 
 # ╔═╡ 643b8876-63c0-493f-9f71-459efccf0378
 md""" # GMsFEM basis functions """
@@ -880,6 +883,9 @@ R0GMsFEM,free0G,x0dG=matrixR_GMsFEM(bfinegrid,neigh,Nx,Ny);
 
 # ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
 plot(reshape(R0GMsFEM[:,(size(R0GMsFEM)[2])÷4+2],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+
+# ╔═╡ 3b9434b4-2b27-4cd2-8a5f-c67ecfdb4a7e
+size(R0GMsFEM)
 
 # ╔═╡ 06a9872f-9505-4e34-a1a9-3c9ea5dba188
 md"""
@@ -2077,9 +2083,9 @@ version = "1.4.1+1"
 # ╟─674a0d3c-ec92-4701-ac7a-f5d5cea3a134
 # ╟─37029624-8a50-453f-b311-f1ed93ecf007
 # ╟─c9618749-7bb6-42ca-8770-73f635d5392b
-# ╠═978d1777-66eb-4af4-8266-91f00bf7c46d
 # ╟─c234ee86-e95f-4b5a-9086-21e2e04ff5c7
 # ╠═ba3582d8-48a6-4db7-b83e-0fdc0ca15715
+# ╠═327d7c78-b74b-4035-9b23-91397621700e
 # ╟─643b8876-63c0-493f-9f71-459efccf0378
 # ╟─e0683b22-c74f-435c-be30-f17b574f14ca
 # ╟─26e66683-c592-46e1-bcf7-9534a4f5d251
@@ -2096,6 +2102,7 @@ version = "1.4.1+1"
 # ╟─65f944f7-7adc-45a4-8df5-2afc24d3f343
 # ╟─e273d043-82b3-4375-b8cc-dcb3104993fd
 # ╠═6f2b93b6-4cd1-4563-959e-2a1d781bb422
+# ╠═3b9434b4-2b27-4cd2-8a5f-c67ecfdb4a7e
 # ╟─06a9872f-9505-4e34-a1a9-3c9ea5dba188
 # ╠═9e9e0ff5-85a6-46ef-84ab-aeac0c696766
 # ╟─554e7743-b0fb-494e-a445-990f31469920
