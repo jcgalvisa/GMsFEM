@@ -344,6 +344,12 @@ begin
 	coefficient_values = coefficient_values_aux[:]
 end
 
+# ╔═╡ d4ae6b40-0c2d-4138-9cdb-faa1581f8064
+md""" We can use surface to visualize the coefficient."""
+
+# ╔═╡ 612966d5-d34f-4ad2-bcb1-abad3d30f24d
+surface(coefficient_values_aux, camera=(0,90),color=cgrad(:jet))	
+
 # ╔═╡ b033c5d0-9e23-4676-8f71-f74f08f92414
 md""" The function that loops over fine grid elements and assamble the find grid matrix and the fine grid load vector is writen next."""
 
@@ -686,18 +692,15 @@ function localeigenvectors(x, neigh, Nx, Ny, add, Elements, vertex_list, coeffic
         end
     end
 
-#    return neigh
+    return neigh
 end
 end
 
 # ╔═╡ ba3582d8-48a6-4db7-b83e-0fdc0ca15715
 begin
-	additional_basis =0;
-	localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
+	additional_basis =5;
+	neigh_eig=localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
 end
-
-# ╔═╡ 327d7c78-b74b-4035-9b23-91397621700e
-neigh[2,2].Nbad
 
 # ╔═╡ 643b8876-63c0-493f-9f71-459efccf0378
 md""" # GMsFEM basis functions """
@@ -783,15 +786,18 @@ function GMsFEMbasis(neigh::Matrix{Neighborhood}, Nx::Int, Ny::Int)
 #			returnaux=neigh[i1,i2].cb
         end
     end
-   # return neigh
+    return neigh
 end
 
 
 # ╔═╡ 14163b19-0b4f-4518-8bbc-66abc6796a30
-GMsFEMbasis(neigh, Nx, Ny)
+neigh_basis=GMsFEMbasis(neigh_eig, Nx, Ny);
 
 # ╔═╡ 17f2821c-c15e-44c2-af4c-4613995aa7cc
 md"""We can use plot to visualize some of the coarse basis funcions. """
+
+# ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
+plot(reshape(neigh_basis[3,3].cb[:,1],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
 
 # ╔═╡ 6b4cce39-3be4-4965-a5b4-264ea8e07444
 md""" 
@@ -879,10 +885,7 @@ x0d[dirn]=x0d_aux
 end
 
 # ╔═╡ 6f2b93b6-4cd1-4563-959e-2a1d781bb422
-R0GMsFEM,free0G,x0dG=matrixR_GMsFEM(bfinegrid,neigh,Nx,Ny);
-
-# ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
-plot(reshape(R0GMsFEM[:,(size(R0GMsFEM)[2])÷4+2],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+R0GMsFEM,free0G,x0dG=matrixR_GMsFEM(bfinegrid,neigh_basis,Nx,Ny);
 
 # ╔═╡ 3b9434b4-2b27-4cd2-8a5f-c67ecfdb4a7e
 size(R0GMsFEM)
@@ -2063,6 +2066,8 @@ version = "1.4.1+1"
 # ╟─3371ae2b-8285-499a-bcd4-1e2eef1202b7
 # ╟─6dab157d-b945-4141-90d9-8cf955ba1de6
 # ╠═c16cc1cb-0b4a-4a8c-96b9-a03dd42dfdc5
+# ╟─d4ae6b40-0c2d-4138-9cdb-faa1581f8064
+# ╠═612966d5-d34f-4ad2-bcb1-abad3d30f24d
 # ╟─b033c5d0-9e23-4676-8f71-f74f08f92414
 # ╟─d0a533b0-9a70-4e61-ace4-64f6fb789448
 # ╠═f6988d22-7c89-4f09-9f7d-72935a0c62f0
@@ -2085,7 +2090,6 @@ version = "1.4.1+1"
 # ╟─c9618749-7bb6-42ca-8770-73f635d5392b
 # ╟─c234ee86-e95f-4b5a-9086-21e2e04ff5c7
 # ╠═ba3582d8-48a6-4db7-b83e-0fdc0ca15715
-# ╠═327d7c78-b74b-4035-9b23-91397621700e
 # ╟─643b8876-63c0-493f-9f71-459efccf0378
 # ╟─e0683b22-c74f-435c-be30-f17b574f14ca
 # ╟─26e66683-c592-46e1-bcf7-9534a4f5d251
