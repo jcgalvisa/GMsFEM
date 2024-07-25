@@ -399,7 +399,7 @@ end
 md""" We can use plot to visualize the reference solution."""
 
 # ╔═╡ b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
-plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet,10, categorical = true))	
+plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(0,90),color=cgrad(:jet))	
 
 # ╔═╡ 21a9498c-8c53-481d-a419-7c943cbe7557
 md""" # Coarse mesh and neighborhoods"""
@@ -423,7 +423,12 @@ We next review some important aspects in the construction of GMsFEM basis functi
 We denote by $\{y_i\}_{i=1}^{N_v}$ the vertices of the coarse mesh $\mathcal{T}^H$ and define the neighborhood of each node $y_i$ by 
 
 $\omega_i=\bigcup\left\{ K\in \mathcal{T}^H: y_i \in\bar{K}  \right\}.$
+
+This definitions is illustrated in the following figure.
 """
+
+# ╔═╡ 4751d40e-3b36-41ef-bb4b-a3e054cc1351
+LocalResource("meshes.png")
 
 # ╔═╡ c1fa4106-2c9f-42aa-8aca-f3f4ffe0300a
 md""" For our simple example we consider a coarse mesh made of $N_x$ element in the x direcction and $N_y$ elements in the y direction. We compute the corresponding data for each neighborhood in the following functions.""" 
@@ -698,7 +703,7 @@ end
 
 # ╔═╡ ba3582d8-48a6-4db7-b83e-0fdc0ca15715
 begin
-	additional_basis =0;
+	additional_basis =1;
 	neigh_eig=localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
 end
 
@@ -921,7 +926,7 @@ downz0G=compute_GMsFEMpressure(A0GMsFEM,b0G,R0GMsFEM,free0G,x0dG);
 md""" We can use plot to visualize the GMsFEM approximation."""
 
 # ╔═╡ 1ed3a75a-9811-41b2-a774-ab983854afc5
-plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet,10, categorical = true))
+plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(0,90),color=cgrad(:jet))
 
 # ╔═╡ 0d30ed9e-43b2-4df3-a7f9-bfe34d3503b7
 md"""# Selected references 
@@ -2078,6 +2083,7 @@ version = "1.4.1+1"
 # ╟─21a9498c-8c53-481d-a419-7c943cbe7557
 # ╟─3ce90889-e2f7-4c19-8c1e-c5353686dcba
 # ╟─7668b780-299e-492e-859c-57acd0d6b4f0
+# ╠═4751d40e-3b36-41ef-bb4b-a3e054cc1351
 # ╟─c1fa4106-2c9f-42aa-8aca-f3f4ffe0300a
 # ╟─7696d9b6-b389-436d-b0db-fa05be494628
 # ╠═615e4804-9fcd-4265-9514-abfa981d5908
