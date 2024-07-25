@@ -348,7 +348,7 @@ end
 md""" We can use surface to visualize the coefficient."""
 
 # ╔═╡ 612966d5-d34f-4ad2-bcb1-abad3d30f24d
-surface(coefficient_values_aux, camera=(0,90),color=cgrad(:jet))	
+heatmap(coefficient_values_aux,color=cgrad(:jet))	
 
 # ╔═╡ b033c5d0-9e23-4676-8f71-f74f08f92414
 md""" The function that loops over fine grid elements and assamble the find grid matrix and the fine grid load vector is writen next."""
@@ -399,7 +399,7 @@ end
 md""" We can use plot to visualize the reference solution."""
 
 # ╔═╡ b9a9d458-2b0b-47e8-9f7e-682213ecc8b0
-plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))	
+plot(reshape(pfine,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet,10, categorical = true))	
 
 # ╔═╡ 21a9498c-8c53-481d-a419-7c943cbe7557
 md""" # Coarse mesh and neighborhoods"""
@@ -698,7 +698,7 @@ end
 
 # ╔═╡ ba3582d8-48a6-4db7-b83e-0fdc0ca15715
 begin
-	additional_basis =5;
+	additional_basis =0;
 	neigh_eig=localeigenvectors(bfinegrid*0,neigh, Nx,Ny,additional_basis,Elements,vertex_list,coefficient_values,mesh_parameter);
 end
 
@@ -797,7 +797,7 @@ neigh_basis=GMsFEMbasis(neigh_eig, Nx, Ny);
 md"""We can use plot to visualize some of the coarse basis funcions. """
 
 # ╔═╡ 977a3d42-71b5-414b-bc0d-00b154e0dd82
-plot(reshape(neigh_basis[3,3].cb[:,1],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+plot(reshape(neigh_basis[3,3].cb[:,1],Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet,10, categorical = true))
 
 # ╔═╡ 6b4cce39-3be4-4965-a5b4-264ea8e07444
 md""" 
@@ -921,7 +921,7 @@ downz0G=compute_GMsFEMpressure(A0GMsFEM,b0G,R0GMsFEM,free0G,x0dG);
 md""" We can use plot to visualize the GMsFEM approximation."""
 
 # ╔═╡ 1ed3a75a-9811-41b2-a774-ab983854afc5
-plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet))
+plot(reshape(downz0G,Nx*nx+1,Ny*ny+1),st=:surface,camera=(30,50),color=cgrad(:jet,10, categorical = true))
 
 # ╔═╡ 0d30ed9e-43b2-4df3-a7f9-bfe34d3503b7
 md"""# Selected references 
