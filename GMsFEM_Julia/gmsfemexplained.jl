@@ -21,7 +21,7 @@ In this notebook, we provide a straightforward implementation that illustrates t
 # ╔═╡ c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
 md""" # Julia and Pluto
 
-The implementation is written in  [Julia](https://julialang.org/) and we use [Pluto](https://plutojl.org/). J. Galvis and Karina Sarmiento prepared the Julia version. If you have any comments or questions, please write an email to `jcgalvisa@unal.edu.co`.
+The implementation is written in  [Julia](https://julialang.org/) and we use [Pluto](https://plutojl.org/). J. Galvis and Karina Sarmiento prepared the Julia version. If you have any comments or questions, please email `jcgalvisa@unal.edu.co`.
 
 #  MatLab/Octave
 For a previous MatLab implementation see [Matlab GMsFEM](https://github.com/jcgalvisa/GMsFEM).
@@ -30,11 +30,14 @@ For a previous MatLab implementation see [Matlab GMsFEM](https://github.com/jcga
 # ╔═╡ e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
 md""" # The fine grid problem"""
 
+# ╔═╡ 154f83e1-49b9-4c8f-b302-e267ea797605
+md""" We use the following Julia packages."""
+
 # ╔═╡ 70650d20-4f57-47c5-9a17-22ee97222a6c
 md"""
 In order to introduce the details of GMsFEM, we will present a simple
 example demonstrating the 
-main concept of GMsFEM. We consider
+main concept of GMsFEM. We consider the following multiscale elliptic equation
 
 $-\mbox{div}(\kappa(x)\nabla u)=f\ \text{in}\ D,$
 
@@ -57,13 +60,12 @@ end
 
 # ╔═╡ 6336610a-c17b-41d8-ad88-43901bbde98c
 md"""
- A variational formulation of the problem is: Given an extension
-of $g$, $\mathcal{E}g\in H^1(D)$, 
-find $p\in H^1(D)$ with $(p-\mathcal{E}g)\in H_{0}^1=\left\{w\in H^1(D) : w|_{\partial D}=0\right\}$ such that
+ A variational formulation of the problem is:  
+find $p\in H^1(D)$ with $p=g$ on $\partial D$ such that 
 
 $a(p,v)=\ell(v) \quad \mbox{ for all } v\in H_0^1(\Omega),$
 
-where the bilinear form $a$  is defined by
+where  $H_{0}^1=\left\{w\in H^1(D) : w|_{\partial D}=0\right\}$ and the bilinear form $a$  is defined by
 
 $a(p,v)=\int_D \kappa (x)\nabla p(x)\nabla v(x) dx,$
 
@@ -71,13 +73,14 @@ and the functional $\ell$ is defined by
 
 $\ell(v)=\int_D f(x)v(x)dx,$
 
-for $p,v\in H_0^1(D)$. 
+for $p,v\in H^1(D)$. 
 """
 
 # ╔═╡ 56cf4d5e-e309-451f-9b03-7d15fa776a33
 md"""
- Let $\tau^h$ be a triangulation of the domain $D$.  As it is usual in multiscale methods, we assume that $h$ is fine enough to completely describe all the variations of the coefficient $\kappa$ and 
-therefore we refer to $\tau^h$ as the fine mesh.  We denote by $V^h(D)$ the usual finite elements discretization of piecewise linear (or bilinear) continuous functions with respect to $\tau^h$. Denote by $V_0^h(D)$ the subset of $V^h(D)$ made of functions that vanish on $\partial D$. 
+ Let $\tau^h$ be a triangulation of the domain $D$.  As usual in multiscale methods, we assume that $h$ is fine enough to completely describe all the variations of the coefficient $\kappa$ and 
+therefore we refer to $\tau^h$ as the fine mesh. In this simple case we assume that 
+the coefficient $\kappa$ is piecewise constant with respect to $\tau^h$. We denote by $V^h(D)$ the usual finite elements discretization of piecewise linear (or bilinear) continuous functions with respect to $\tau^h$. Denote by $V_0^h(D)$ the subset of $V^h(D)$ made of functions that vanish on $\partial D$. 
 
 The Galerkin formulation leads to the solution of the (fine-grid) linear system
 
@@ -332,7 +335,7 @@ end
 end
 
 # ╔═╡ 3371ae2b-8285-499a-bcd4-1e2eef1202b7
-md""" For our simple example the forcing term is shown above."""
+md""" For our simple example the forcing term  and boundary condition are shown above."""
 
 # ╔═╡ 6dab157d-b945-4141-90d9-8cf955ba1de6
 md""" Then, we construct global matrices and vectors. For our simple example, the coefficient is a matrix $\kappa$ of size $N_yn_y$ rows and $N_xn_x$ columns containing the constant value of the coefficient in each fine-grid element. To have a working example, let us generate a random coefficient as follows. """
@@ -345,13 +348,13 @@ begin
 end
 
 # ╔═╡ d4ae6b40-0c2d-4138-9cdb-faa1581f8064
-md""" We can use surface to visualize the coefficient."""
+md""" We can use `heatmap` to visualize the coefficient."""
 
 # ╔═╡ 612966d5-d34f-4ad2-bcb1-abad3d30f24d
 heatmap(coefficient_values_aux,color=cgrad(:jet))	
 
 # ╔═╡ b033c5d0-9e23-4676-8f71-f74f08f92414
-md""" The function that loops over fine grid elements and assamble the find grid matrix and the fine grid load vector is writen next."""
+md""" The function that loops over fine grid elements and assamble the fine grid matrix and the fine grid load vector is presented next."""
 
 # ╔═╡ d0a533b0-9a70-4e61-ace4-64f6fb789448
 begin
@@ -383,7 +386,7 @@ end
 Afinegrid,bfinegrid=Nmatrix(Elements,vertex_list,coefficient_values,mesh_parameter)
 
 # ╔═╡ 1aa64f3a-58dc-4183-8e90-8d16d0b59e8a
-md""" We can then use Julia solver to compute the fine-grid solution. We will refere to this solution as the reference solution. We have chosen  to impose the Dirichlet boundary condition for our simple example."""
+md""" We can then use the Julia linear system solver to compute the fine-grid solution. We will go ahead and refer to this solution as the reference solution. We have chosen  to impose the Dirichlet boundary condition for our simple example as stated above."""
 
 # ╔═╡ 50ae23c5-ac63-49d3-b841-66a41516fe43
 begin
@@ -406,7 +409,7 @@ md""" # Coarse mesh and neighborhoods"""
 
 # ╔═╡ 3ce90889-e2f7-4c19-8c1e-c5353686dcba
 md"""
-This fine-grid system is very large and ill-conditioned and in many situations, it is impractical to solve it using an itertive method. Besides preconditioning [1,2], we can construct small subspaces (referred to as coarse subspaces) that can capture the main properties of the solution. GMsFEM can be viewed as a successful methodology to construct coarse spaces, [3,4,5].
+This fine-grid system is very large and ill-conditioned and in many situations, it is impractical to solve it using an itertive method. Besides preconditioning [1,2], we can construct small subspaces (referred to as coarse subspaces) that can capture the main properties of the solution. Coarse spaces are also needed in order to construct robust preconditioners (e.g., two-levels methods). GMsFEM can be viewed as a successful methodology to construct coarse spaces, [3,4,5].
 """
 
 # ╔═╡ 7668b780-299e-492e-859c-57acd0d6b4f0
@@ -424,14 +427,14 @@ We denote by $\{y_i\}_{i=1}^{N_v}$ the vertices of the coarse mesh $\mathcal{T}^
 
 $\omega_i=\bigcup\left\{ K\in \mathcal{T}^H: y_i \in\bar{K}  \right\}.$
 
-This definitions is illustrated in the following figure.
+This definition is illustrated in the following figure.
 """
 
 # ╔═╡ 4751d40e-3b36-41ef-bb4b-a3e054cc1351
 LocalResource("meshes.png")
 
 # ╔═╡ c1fa4106-2c9f-42aa-8aca-f3f4ffe0300a
-md""" For our simple example we consider a coarse mesh made of $N_x$ element in the x direcction and $N_y$ elements in the y direction. We compute the corresponding data for each neighborhood in the following functions.""" 
+md""" For our simple example we consider a coarse mesh made of $N_x$ element in the $x$ direcction and $N_y$ elements in the $y$ direction. We compute the corresponding data for each neighborhood in the following functions.""" 
 
 # ╔═╡ 7696d9b6-b389-436d-b0db-fa05be494628
 begin
@@ -514,7 +517,7 @@ md""" # Local eigenvalue problem"""
 
 # ╔═╡ fb131848-d26b-461b-982c-7adbbda3c8ad
 md"""
-For each coarse node neighborhood $\omega_i$, consider the eigenvalue problem (which is the simplest that one can considere, see the references)
+For each coarse node neighborhood $\omega_i$, consider the eigenvalue problem (which is the simplest that one can use, see [3,4,5])
 
 $-\mbox{div}(\kappa  \nabla \psi_\ell^{\omega_i})=\lambda_\ell^{\omega_i}\kappa \psi_\ell^{\omega_i}, \quad \mbox{in }\omega_i$
 with homogeneous Neumann
@@ -817,17 +820,16 @@ md"""
 Summarizing, for the multiscale approximation of the pressure we use the GMsFEM coarse space $V_0$ constructed in 
 this section. More precisely, let 
 
-$R_0= [\Phi_{1,1}, \Phi_{1,2},\dots, \Phi_{N_v,L_{N_v+L}} ]$ 
+$R_0= [\Phi_{1,1}, \Phi_{1,2},\dots, \Phi_{N_v,L_{N_v}+L} ]$ 
 
 the matrix whose columns correspond to the coarse basis functions, that is, the column space of $R_0$ is $V_0$. Instead of solving the fine-scale linear system 
+above, we solve the coarse-scale linear system
 
 $A_0 u_0 = b_0$
 
 where 
 
-$A_0 =R_0^T A_hR_0 \quad \mbox{ and } \quad b_0=R_0^Tb$.
-
-We have the multiscale approximation $u_h\approx R_0u_0$.
+$A_0 =R_0^T A_hR_0 \quad \mbox{ and } \quad b_0=R_0^Tb$. **We have the multiscale approximation $u_h\approx R_0u_0$**.
 """
 
 # ╔═╡ 65f944f7-7adc-45a4-8df5-2afc24d3f343
@@ -2055,6 +2057,7 @@ version = "1.4.1+1"
 # ╟─9a843ac4-16bb-4971-85c4-5cd2699a9273
 # ╟─c7ef6a91-d73f-4c89-b2a4-d29f957edfd8
 # ╟─e9ca6f6e-530e-4db2-9fdc-ad2d58cfb50e
+# ╟─154f83e1-49b9-4c8f-b302-e267ea797605
 # ╠═00ff805d-d9c1-4312-a5a3-ba173205db39
 # ╟─70650d20-4f57-47c5-9a17-22ee97222a6c
 # ╟─d39d4a1d-0972-468f-b931-d097d39ea182
