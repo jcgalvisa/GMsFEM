@@ -88,7 +88,11 @@ $A_h u_h=b_h$
 
 where 
 
-$u^TAv=\int_{D} \kappa\nabla u\nabla v.$
+$v^TA_hu=\int_{D} \kappa\nabla u\nabla v.$
+
+and 
+
+$v^Tb_h=\int_D f(x)v(x)dx.$
 
 """
 
